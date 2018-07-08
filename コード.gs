@@ -1,5 +1,5 @@
 function showMainDialog() {
-  var html = HtmlService.createHtmlOutputFromFile('test');
+  var html = HtmlService.createHtmlOutputFromFile('index');
   html.setHeight(1000).setWidth(1500).setTitle('交通費精算書作成');
   SpreadsheetApp.getActiveSpreadsheet().show(html);  
 }
