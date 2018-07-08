@@ -1,5 +1,5 @@
 function RouteMaster() {
-  
+
   this.masterData;
  
   /*
