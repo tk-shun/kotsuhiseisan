@@ -1,30 +1,66 @@
 <!DOCTYPE html>
 <html>
 <head>
+<!-- jquery -->
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/floatthead/1.4.5/jquery.floatThead.js"></script>
 <!-- bootstrap -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<!-- jquery -->
-<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script> 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/floatthead/1.4.5/jquery.floatThead.js"></script>
-
-<script type="text/javascript">
-</script>
+<style type="text/css">
+span.routename{
+    display: block;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+</style>
 </head>
 <body>
-
-<div class="input-group">
-  <span class="input-group-addon" id="basic-addon">年月</span>
-  <input id="yymm" type="month" class="form-control">
+<div class="panel panel-default" style="background: #fafafa;width: 300px;display: inline-block;">
+  <div class="panel-body">
+    <div class="btn-group" data-toggle="buttons">
+      <label id="gaishutsuInfoEdit" class="btn btn-primary active">
+		<input type="radio" autocomplete="off" checked>外出情報編集
+	  </label>
+      <label id="rootMasterEdit" class="btn btn-primary">
+        <input type="radio" autocomplete="off">経路マスタ編集
+      </label>
+    </div>
+  </div>
 </div>
-<button class="btn btn-primary" onClick="test();">テスト</button>
-<button class="btn btn-primary" onClick="createKotsuhiSeisan();">作成</button>
-  <table id="event" class="table table-condensed table-bordered floatThead">
+<div class="panel panel-default" style="background: #fafafa;width: 350px;display: inline-block;">
+  <div class="panel-body">
+    <input style="width:160px;display: inline-block" id="yymm" type="month" class="form-control">
+    <button id="create" class="btn btn-default" onClick="createKotsuhiSeisan();">外出情報取得</button>
+  </div>
+</div>
+
+<div class="panel panel-default" style="background: #fafafa;">
+  <div class="panel-body">
+<table id="event" class="table table-condensed table-bordered floatThead">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:200px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
+    <colgroup span="1" style="width:50px;">
     <thead style="background:#cccccc;">
       <tr>
         <th>日付</th>
         <th>行先</th>
+        <th>経路</th>
         <th>用件</th>
         <th>往復</th>
         <th colspan="3">経路1</th>
@@ -36,25 +72,118 @@
     <tbody id="eventDetail">
     </tbody>
   </table>
+</div>
+</div>
 <script type="text/javascript">
+var routeMaster;
+/*
+ 年月欄に当月を設定
+*/
 $(function(){
 //  $('.floatThead').floatThead();
-  
-  　　// 年月欄に当月を設定
   var date = new Date();
   var yyyy = date.getFullYear();
   var mm = ("0"+(date.getMonth()+1)).slice(-2);
-  $('#yymm').val(yyyy+'-'+mm);
+  $('#yymm').val(yyyy+'-'+mm); 
 });
 
+/*
+ ドロップダウンの値を選択
+ $(docment)を使用すると後から追加した要素も評価対象となるので、こっちを使う。
+*/
+$(document).on('click', '.dropdown-item', function(){
+  // ドロップダウン表示の書き換え
+  var button = $(this).parent().parent().find('button');
+  button.eq(0).attr('title', $(this).text());
+  var displayItem = button.find('span.routename');
+  displayItem.html($(this).text());
+  
+  // テーブルの値の書き換え
+  var rowNumClass = $(this).parent().parent().parent().parent()[0].className.split(" ")[1];
+  var tr = $('.' + rowNumClass);
+  tr.eq(0).find('td').eq(3).html(routeMaster[$(this).text()]['business']);
+  tr.eq(0).find('td').eq(4).html(routeMaster[$(this).text()]['round-trip']);
+  tr.eq(0).find('td').eq(5).html(routeMaster[$(this).text()]['route1']);
+  tr.eq(0).find('td').eq(6).html(routeMaster[$(this).text()]['route2']);
+  tr.eq(0).find('td').eq(7).html(routeMaster[$(this).text()]['route3']);
+  tr.eq(0).find('td').eq(8).html(routeMaster[$(this).text()]['route4']);
+  tr.eq(1).find('td').eq(0).html(routeMaster[$(this).text()]['departure']);
+  tr.eq(1).find('td').eq(1).html(routeMaster[$(this).text()]['arrival1']);
+  tr.eq(1).find('td').eq(2).html(routeMaster[$(this).text()]['fare1']);
+  tr.eq(1).find('td').eq(3).html(routeMaster[$(this).text()]['arrival2']);
+  tr.eq(1).find('td').eq(4).html(routeMaster[$(this).text()]['fare2']);
+  tr.eq(1).find('td').eq(5).html(routeMaster[$(this).text()]['arrival3']);
+  tr.eq(1).find('td').eq(6).html(routeMaster[$(this).text()]['fare3']);
+  tr.eq(1).find('td').eq(7).html(routeMaster[$(this).text()]['arrival4']);
+  tr.eq(1).find('td').eq(8).html(routeMaster[$(this).text()]['fare4']);
+});
 
-/* 作成処理実行 */
+/*
+ 画面切り替え。非活性の時の処理は目をつぶる。
+*/
+$(function(){
+      $('#rootMasterEdit').on('click', function(){
+        google.script.host.setHeight(30);
+        google.script.host.setWidth(500);
+        google.script.host.editor.focus()
+      });
+
+      $('#gaishutsuInfoEdit').on('click', function(){
+      　　refreshRouteMaster();
+        rewriteRouteMasterDropDown();
+        google.script.host.setHeight(1500);
+        google.script.host.setWidth(1500);
+      });
+});
+
+/*
+ 作成処理実行
+*/
 function createKotsuhiSeisan(){
-　　var yymm = $('#yymm').val();
+  // 表の作成
+  var yymm = $('#yymm').val();
   google.script.run.withSuccessHandler(result).createEventsHtml(yymm);
   function result(html){
-    $('#eventDetail').append(html);
+    $('#eventDetail').html(html);
+  }
+  refreshRouteMaster();
+}  
+/*
+ 最新のルートマスタを取得してグローバル変数に設定する
+*/
+function refreshRouteMaster(){
+  google.script.run.withSuccessHandler(result).getRouteMaster();
+  function result(latestRouteMaster){
+    routeMaster = latestRouteMaster;
+  }
+}
+
+/*
+ 経路マスタのドロップダウンを最新情報で書き換え
+*/
+function rewriteRouteMasterDropDown(){
+  google.script.run.withSuccessHandler(result).getRouteMasterDropdownValueTag();
+  function result(latestRouteMasterDropdownValueTag){
+    var localRouteMasterDropdownValueTag = latestRouteMasterDropdownValueTag;
+
+    // 書き換え
+    $('.dropdown-menu').each(function(index, element) {
+      $(element).html(localRouteMasterDropdownValueTag);
+    });
 　　}
+}
+
+/*
+ ツールチップの初期化
+*/
+$(function () {
+	$('[data-toggle="tooltip"]').tooltip();
+});
+
+function test(){
+}
+function test2(){
+  google.script.host.editor.focus()
 }
 
 </script>

@@ -1,9 +1,22 @@
-function CalendarEventHtmlMaker() {
+function CalendarEventRowMaker() {
   this.rowTemplate = function(){
     var rowTemplate = '';
-    rowTemplate += '<tr ${trAttribute}>';
+    rowTemplate += '<tr class="${trAttribute} row${rownum}">';
     rowTemplate += '  <td rowspan="2">${date}</td>';
     rowTemplate += '  <td rowspan="2">${destination}</td>';
+    rowTemplate += '<td rowspan="2">';
+    rowTemplate += '    <div class="dropdown btn-group" style="width:100%;">';
+    rowTemplate += '      <button style="width:270px;" class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu${rownum}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-toggle="tooltip" title="${routename}">';
+    rowTemplate += '        <span class="routename">${routename}</span>';
+    rowTemplate += '      </button>';
+    rowTemplate += '      <button style="width:30px;" class="btn btn-default dropdown-toggle" type="button" id="dropdownCaret${rownum}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
+    rowTemplate += '        <span class="caret"></span>';
+    rowTemplate += '      </button>';
+    rowTemplate += '      <ul class="dropdown-menu" aria-labelledby="dropdownMenu${rownum}">';
+    rowTemplate += '        ${routeMasterDropdownValueTag}';
+    rowTemplate += '      </ul>';
+    rowTemplate += '    </div>';
+    rowTemplate += '</td>';
     rowTemplate += '  <td rowspan="2">${business}</td>';
     rowTemplate += '  <td rowspan="2">${round-trip}</td>';
     rowTemplate += '  <td colspan="3">${route1}</td>';
@@ -11,7 +24,7 @@ function CalendarEventHtmlMaker() {
     rowTemplate += '  <td colspan="2">${route3}</td>';
     rowTemplate += '  <td colspan="2">${route4}</td>';
     rowTemplate += '</tr>';
-    rowTemplate += '<tr ${trAttribute}>';
+    rowTemplate += '<tr class="${trAttribute} row${rownum}">';
     rowTemplate += '  <td>${departure}</td>';
     rowTemplate += '  <td>${arrival1}</td>';
     rowTemplate += '  <td>${fare1}</td>';
@@ -27,23 +40,28 @@ function CalendarEventHtmlMaker() {
   }
   
   this.convertEventsToHtml = function(events){
-    var html = '';
     var routeMaster = new RouteMaster();
     routeMaster.load();
-    Logger.log('きたよー1');    
+    var routeMasterDropdownValueTag = routeMaster.createRouteMasterDropdownValueTag();
+
+    var html = '';
     for(var i = 0; i < events.length; i++){
-      html += this.replaceRowTemplate(events[i], i, routeMaster.masterData);
+      html += this.replaceRowTemplate(events[i], i, routeMaster.masterData, routeMasterDropdownValueTag);
     }
-    
     return html;
   }
   
-  this.replaceRowTemplate = function(event, index, routeMasterData){
+  this.replaceRowTemplate = function(event, index, routeMasterData, routeMasterDropdownValueTag){
     var rowHtml = this.rowTemplate();
     rowHtml = rowHtml.replace('${date}', event['date']);
     rowHtml = rowHtml.replace('${destination}', event['destination']);
     
+    // 経路マスタの有無に関係なく設定
+    rowHtml = rowHtml.replace(/\$\{rownum\}/g, index); // 正規表現を使用して、複数個所の一括置換
+    rowHtml = rowHtml.replace('${routeMasterDropdownValueTag}', routeMasterDropdownValueTag);
+    
     if(routeMasterData[event['destination']] == null){
+      rowHtml = rowHtml.replace(/\$\{routename}/g, '-');
       rowHtml = rowHtml.replace('${business}', '');
       rowHtml = rowHtml.replace('${round-trip}', '');
       rowHtml = rowHtml.replace('${route1}', '');
@@ -61,6 +79,7 @@ function CalendarEventHtmlMaker() {
       rowHtml = rowHtml.replace('${fare4}', '');      
     } else {     
       var routeMasterDataDetail = routeMasterData[event['destination']];
+      rowHtml = rowHtml.replace(/\$\{routename}/g, routeMasterDataDetail['routename']);
       rowHtml = rowHtml.replace('${business}', routeMasterDataDetail['business']);
       rowHtml = rowHtml.replace('${round-trip}', routeMasterDataDetail['round-trip']);
       rowHtml = rowHtml.replace('${route1}', routeMasterDataDetail['route1']);
@@ -77,11 +96,11 @@ function CalendarEventHtmlMaker() {
       rowHtml = rowHtml.replace('${fare3}', routeMasterDataDetail['fare3']);
       rowHtml = rowHtml.replace('${fare4}', routeMasterDataDetail['fare4']);
     }
-    // 行のストライプ化
+    // 行のストライプ用Class指定
     if(index % 2 === 0){
-      rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'class="active"');
+      // 正規表現を使用して、複数個所の一括置換を行う
+      rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
     }
-    
     return rowHtml;
   }
   
