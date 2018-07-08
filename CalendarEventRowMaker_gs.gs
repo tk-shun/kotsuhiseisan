@@ -5,8 +5,8 @@ function CalendarEventRowMaker() {
     rowTemplate += '  <td rowspan="2">${date}</td>';
     rowTemplate += '  <td rowspan="2">${destination}</td>';
     rowTemplate += '<td rowspan="2">';
-    rowTemplate += '    <div class="dropdown btn-group" style="width:100%;">';
-    rowTemplate += '      <button style="width:270px;" class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu${rownum}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-toggle="tooltip" title="${routename}">';
+    rowTemplate += '    <div class="dropdown btn-group">';
+    rowTemplate += '      <button style="width:170px;" class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu${rownum}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-toggle="tooltip" title="${routename}">';
     rowTemplate += '        <span class="routename">${routename}</span>';
     rowTemplate += '      </button>';
     rowTemplate += '      <button style="width:30px;" class="btn btn-default dropdown-toggle" type="button" id="dropdownCaret${rownum}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
@@ -91,16 +91,22 @@ function CalendarEventRowMaker() {
       rowHtml = rowHtml.replace('${arrival2}', routeMasterDataDetail['arrival2']);
       rowHtml = rowHtml.replace('${arrival3}', routeMasterDataDetail['arrival3']);
       rowHtml = rowHtml.replace('${arrival4}', routeMasterDataDetail['arrival4']);
-      rowHtml = rowHtml.replace('${fare1}', routeMasterDataDetail['fare1']);
-      rowHtml = rowHtml.replace('${fare2}', routeMasterDataDetail['fare2']);
-      rowHtml = rowHtml.replace('${fare3}', routeMasterDataDetail['fare3']);
-      rowHtml = rowHtml.replace('${fare4}', routeMasterDataDetail['fare4']);
+      var fare1Yen = routeMasterDataDetail['fare1'] == '' ? '' : '￥'; 
+      rowHtml = rowHtml.replace('${fare1}', fare1Yen + routeMasterDataDetail['fare1']);
+      var fare2Yen = routeMasterDataDetail['fare2'] == '' ? '' : '￥'; 
+      rowHtml = rowHtml.replace('${fare2}', fare2Yen + routeMasterDataDetail['fare2']);
+      var fare3Yen = routeMasterDataDetail['fare3'] == '' ? '' : '￥'; 
+      rowHtml = rowHtml.replace('${fare3}', fare3Yen + routeMasterDataDetail['fare3']);
+      var fare4Yen = routeMasterDataDetail['fare4'] == '' ? '' : '￥'; 
+      rowHtml = rowHtml.replace('${fare4}', fare4Yen + routeMasterDataDetail['fare4']);
     }
-    // 行のストライプ用Class指定
+    // 行のストライプ・・・をしようとした残骸
     if(index % 2 === 0){
-      // 正規表現を使用して、複数個所の一括置換を行う
+      rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
+    } else {
       rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
     }
+    
     return rowHtml;
   }
   

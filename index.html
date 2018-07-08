@@ -3,10 +3,9 @@
 <head>
 <!-- jquery -->
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script> 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/floatthead/1.4.5/jquery.floatThead.js"></script>
 <!-- bootstrap -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+<!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">-->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 <style type="text/css">
 span.routename{
@@ -15,10 +14,17 @@ span.routename{
     text-overflow: ellipsis;
     overflow: hidden;
 }
+.white{
+  background: #FFFFFF;
+}
+td{
+  word-break: break-all; // 強制改行
+}
+
 </style>
 </head>
 <body>
-<div class="panel panel-default" style="background: #fafafa;width: 300px;display: inline-block;">
+<div class="panel panel-default" style="background: #fafafa;display: inline-block;">
   <div class="panel-body">
     <div class="btn-group" data-toggle="buttons">
       <label id="gaishutsuInfoEdit" class="btn btn-primary active">
@@ -30,34 +36,30 @@ span.routename{
     </div>
   </div>
 </div>
-<div class="panel panel-default" style="background: #fafafa;width: 350px;display: inline-block;">
+<div class="panel panel-default" style="background: #fafafa;display: inline-block;">
   <div class="panel-body">
-    <input style="width:160px;display: inline-block" id="yymm" type="month" class="form-control">
+    <input style="width:160px;display: inline-block;" id="yymm" type="month" class="form-control">
     <button id="create" class="btn btn-default" onClick="createKotsuhiSeisan();">外出情報取得</button>
   </div>
 </div>
-
-<div class="panel panel-default" style="background: #fafafa;">
-  <div class="panel-body">
-<table id="event" class="table table-condensed table-bordered floatThead">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:200px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <colgroup span="1" style="width:50px;">
-    <thead style="background:#cccccc;">
-      <tr>
+<div id="table-panel" class="panel panel-default" style="background: #fafafa;width:98%; height: 530px;overflow-y: scroll;overflow-x: auto;">
+<table id="event" class="table table-condensed table-bordered" style="width:100%;table-layout: fixed;">
+    <colgroup span="1" style="width: 30px;">
+    <colgroup span="1" style="width: 100px;">
+    <colgroup span="1" style="width: 200px;">
+    <colgroup span="1" style="width: 80px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
+    <thead>
+      <tr style="background: #3B75AE;color: #ffffff;">
         <th>日付</th>
         <th>行先</th>
         <th>経路</th>
@@ -73,19 +75,8 @@ span.routename{
     </tbody>
   </table>
 </div>
-</div>
 <script type="text/javascript">
 var routeMaster;
-/*
- 年月欄に当月を設定
-*/
-$(function(){
-//  $('.floatThead').floatThead();
-  var date = new Date();
-  var yyyy = date.getFullYear();
-  var mm = ("0"+(date.getMonth()+1)).slice(-2);
-  $('#yymm').val(yyyy+'-'+mm); 
-});
 
 /*
  ドロップダウンの値を選択
@@ -100,39 +91,70 @@ $(document).on('click', '.dropdown-item', function(){
   
   // テーブルの値の書き換え
   var rowNumClass = $(this).parent().parent().parent().parent()[0].className.split(" ")[1];
-  var tr = $('.' + rowNumClass);
-  tr.eq(0).find('td').eq(3).html(routeMaster[$(this).text()]['business']);
-  tr.eq(0).find('td').eq(4).html(routeMaster[$(this).text()]['round-trip']);
-  tr.eq(0).find('td').eq(5).html(routeMaster[$(this).text()]['route1']);
-  tr.eq(0).find('td').eq(6).html(routeMaster[$(this).text()]['route2']);
-  tr.eq(0).find('td').eq(7).html(routeMaster[$(this).text()]['route3']);
-  tr.eq(0).find('td').eq(8).html(routeMaster[$(this).text()]['route4']);
-  tr.eq(1).find('td').eq(0).html(routeMaster[$(this).text()]['departure']);
-  tr.eq(1).find('td').eq(1).html(routeMaster[$(this).text()]['arrival1']);
-  tr.eq(1).find('td').eq(2).html(routeMaster[$(this).text()]['fare1']);
-  tr.eq(1).find('td').eq(3).html(routeMaster[$(this).text()]['arrival2']);
-  tr.eq(1).find('td').eq(4).html(routeMaster[$(this).text()]['fare2']);
-  tr.eq(1).find('td').eq(5).html(routeMaster[$(this).text()]['arrival3']);
-  tr.eq(1).find('td').eq(6).html(routeMaster[$(this).text()]['fare3']);
-  tr.eq(1).find('td').eq(7).html(routeMaster[$(this).text()]['arrival4']);
-  tr.eq(1).find('td').eq(8).html(routeMaster[$(this).text()]['fare4']);
+  var row = $('.' + rowNumClass);
+  rowRewrite(row, $(this).text(), routeMaster);
 });
 
 /*
- 画面切り替え。非活性の時の処理は目をつぶる。
+ テーブルの行データ書き換え
+*/
+function rowRewrite(row, routename, localRouteMaster){
+try{
+  row.eq(0).find('td').eq(3).html(localRouteMaster[routename]['business']);
+  row.eq(0).find('td').eq(4).html(localRouteMaster[routename]['round-trip']);
+  row.eq(0).find('td').eq(5).html(localRouteMaster[routename]['route1']);
+  row.eq(0).find('td').eq(6).html(localRouteMaster[routename]['route2']);
+  row.eq(0).find('td').eq(7).html(localRouteMaster[routename]['route3']);
+  row.eq(0).find('td').eq(8).html(localRouteMaster[routename]['route4']);
+  row.eq(1).find('td').eq(0).html(localRouteMaster[routename]['departure']);
+  row.eq(1).find('td').eq(1).html(localRouteMaster[routename]['arrival1']);
+  var fare1Yen = localRouteMaster[routename]['fare1'] == '' ? '' : '￥'; 
+  row.eq(1).find('td').eq(2).html(fare1Yen + localRouteMaster[routename]['fare1']);
+  row.eq(1).find('td').eq(3).html(localRouteMaster[routename]['arrival2']);
+  var fare2Yen = localRouteMaster[routename]['fare2'] == '' ? '' : '￥'; 
+  row.eq(1).find('td').eq(4).html(fare2Yen + localRouteMaster[routename]['fare2']);
+  row.eq(1).find('td').eq(5).html(localRouteMaster[routename]['arrival3']);
+  var fare3Yen = localRouteMaster[routename]['fare3'] == '' ? '' : '￥'; 
+  row.eq(1).find('td').eq(6).html(fare3Yen + localRouteMaster[routename]['fare3']);
+  row.eq(1).find('td').eq(7).html(localRouteMaster[routename]['arrival4']);
+  var fare4Yen = localRouteMaster[routename]['fare4'] == '' ? '' : '￥'; 
+  row.eq(1).find('td').eq(8).html(fare4Yen + localRouteMaster[routename]['fare4']);
+}catch(e){alert(e)}
+}
+
+/*
+ 画面切り替え。非活性の時にも動く気がするけど見て見ぬふりをする。
 */
 $(function(){
       $('#rootMasterEdit').on('click', function(){
-        google.script.host.setHeight(30);
-        google.script.host.setWidth(500);
+        $('#table-panel').hide();
+        google.script.host.setHeight(70);
         google.script.host.editor.focus()
       });
 
       $('#gaishutsuInfoEdit').on('click', function(){
       　　refreshRouteMaster();
         rewriteRouteMasterDropDown();
-        google.script.host.setHeight(1500);
-        google.script.host.setWidth(1500);
+
+        // 書き換え
+        google.script.run.withSuccessHandler(result).getRouteMaster();
+        function result(latestRouteMaster){
+          for(var rowNum = 0; true; rowNum++){
+            var row = $('.row' + rowNum);
+            var routename = row.find('.routename').text();
+            if(routename === '-' || latestRouteMaster[routename] == null){
+              continue;
+            }
+            // 全行取得し終わったらおしまい
+            if(routename === ''){
+              break;
+            }
+            rowRewrite(row, routename, latestRouteMaster);
+          }
+          google.script.host.setHeight(1500);
+          $('#table-panel').show();
+        }
+
       });
 });
 
@@ -174,17 +196,22 @@ function rewriteRouteMasterDropDown(){
 }
 
 /*
- ツールチップの初期化
+ 画面初期表示時の処理
 */
 $(function () {
-	$('[data-toggle="tooltip"]').tooltip();
+  // ツールチップの初期化（いるのかこれ？）
+　　//　$('[data-toggle="tooltip"]').tooltip();
+
+　　// 日付入力欄の初期化
+  var date = new Date();
+  var yyyy = date.getFullYear();
+  var mm = ("0"+(date.getMonth()+1)).slice(-2);
+  $('#yymm').val(yyyy+'-'+mm); 
+
+  // カレンダーから情報取得初期表示
+　　createKotsuhiSeisan()
 });
 
-function test(){
-}
-function test2(){
-  google.script.host.editor.focus()
-}
 
 </script>
 </body>
