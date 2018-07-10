@@ -102,7 +102,7 @@ function CalendarEventRowMaker() {
     }
     // 行のストライプ・・・をしようとした残骸
     if(index % 2 === 0){
-      rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
+//      rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
     } else {
       rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
     }
