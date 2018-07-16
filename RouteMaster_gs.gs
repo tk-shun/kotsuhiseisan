@@ -48,21 +48,29 @@ function RouteMaster() {
   }
 
  /*
-  経路マスタの情報をドロップダウンで選択する際のliタグを作成する。
+  経路マスタの情報をドロップダウンで選択する際のタグを作成する。
   ※GASとHTML間でマスタ情報を受け渡す際、連想配列で渡すと謎ソートされるっぽいので先にテキストで作っておく。
  */
   this.createRouteMasterDropdownValueTag = function (){
     var routeMasterDropdownValueTag = '';
     Object.keys(this.masterData).forEach(
       function(key){
-        routeMasterDropdownValueTag += '<li class="dropdown-item" role="presentation"><a href="#">';
-        routeMasterDropdownValueTag += (this[key]['routename']);      
-        routeMasterDropdownValueTag += '</a></li>';
+        routeMasterDropdownValueTag += '<option value="';
+        routeMasterDropdownValueTag += this[key]['routename'];
+        routeMasterDropdownValueTag += '">';
+        routeMasterDropdownValueTag += this[key]['routename'];
+        routeMasterDropdownValueTag += '</option>';
       }, this.masterData)
     
     return routeMasterDropdownValueTag;
   }
   
+ /*
+  経路マスタのキーを返す
+ */
+  this.getRouteMasterKyes = function (){
+    return Object.keys(this.masterData);
+  }
   
   
 }

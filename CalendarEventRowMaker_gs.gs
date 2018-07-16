@@ -1,21 +1,15 @@
 function CalendarEventRowMaker() {
   this.rowTemplate = function(){
     var rowTemplate = '';
-    rowTemplate += '<tr class="${trAttribute} row${rownum}">';
+    rowTemplate += '<tr class="${trAttribute} row${rownum} upperRow">';
     rowTemplate += '  <td rowspan="2">${date}</td>';
     rowTemplate += '  <td rowspan="2">${destination}</td>';
     rowTemplate += '<td rowspan="2">';
-    rowTemplate += '    <div class="dropdown btn-group">';
-    rowTemplate += '      <button style="width:170px;" class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu${rownum}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-toggle="tooltip" title="${routename}">';
-    rowTemplate += '        <span class="routename">${routename}</span>';
-    rowTemplate += '      </button>';
-    rowTemplate += '      <button style="width:30px;" class="btn btn-default dropdown-toggle" type="button" id="dropdownCaret${rownum}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">';
-    rowTemplate += '        <span class="caret"></span>';
-    rowTemplate += '      </button>';
-    rowTemplate += '      <ul class="dropdown-menu" aria-labelledby="dropdownMenu${rownum}">';
-    rowTemplate += '        ${routeMasterDropdownValueTag}';
-    rowTemplate += '      </ul>';
-    rowTemplate += '    </div>';
+    rowTemplate += '<div class="ui-widget">';
+    rowTemplate += '  <select class="combobox">';
+    rowTemplate += '   ${routeMasterDropdownValueTag}';
+    rowTemplate += '  </select>';
+    rowTemplate += '</div>';
     rowTemplate += '</td>';
     rowTemplate += '  <td rowspan="2">${business}</td>';
     rowTemplate += '  <td rowspan="2">${round-trip}</td>';
@@ -46,12 +40,17 @@ function CalendarEventRowMaker() {
 
     var html = '';
     for(var i = 0; i < events.length; i++){
-      html += this.replaceRowTemplate(events[i], i, routeMaster.masterData, routeMasterDropdownValueTag);
+      html += this.createRow(events[i], i, routeMaster.masterData, routeMasterDropdownValueTag);
     }
     return html;
   }
   
-  this.replaceRowTemplate = function(event, index, routeMasterData, routeMasterDropdownValueTag){
+  
+  /*
+    行データを作成する。
+    行データは行テンプレートの変数部分を書き換えて作成する。
+  */  
+  this.createRow = function(event, index, routeMasterData, routeMasterDropdownValueTag){
     var rowHtml = this.rowTemplate();
     rowHtml = rowHtml.replace('${date}', event['date']);
     rowHtml = rowHtml.replace('${destination}', event['destination']);

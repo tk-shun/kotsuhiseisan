@@ -49,10 +49,14 @@ td{
 tr{
   height: 31px;
 }
+tbody{
+  display:none;
+}
 
 </style>
 </head>
-<body>
+<body style="overflow-y: scroll;">
+<input type="button" onClick="test2();" value="test"/>
 <div style="display: inline-block;vertical-align: top;">
     <div class="btn-group" data-toggle="buttons">
       <label id="gaishutsuInfoEdit" class="btn btn-default active">
@@ -112,19 +116,62 @@ var routeMaster;
  ドロップダウンの値を選択
  $(docment)を使用すると後から追加した要素も評価対象となるので、こっちを使う。
 */
-$(document).on('click', '.dropdown-item', function(){
-  // ドロップダウン表示の書き換え
-  var button = $(this).parent().parent().find('button');
-  button.eq(0).attr('title', $(this).text());
-  var displayItem = button.find('span.routename');
-  displayItem.html($(this).text());
-  
-  // テーブルの値の書き換え
-  var rowNumClass = $(this).parent().parent().parent().parent()[0].className.split(" ")[1];
-  var row = $('.' + rowNumClass);
-  rowRewrite(row, $(this).text(), routeMaster);
+$(document).on('autocompleteselect', '.custom-combobox-input', function(event, ui){
+  dropDownChange(ui.item.value, $(this));
+});
+/*
+ ドロップダウンの値を選択。↑とまとめられるはず。
+ $(docment)を使用すると後から追加した要素も評価対象となるので、こっちを使う。
+*/
+$(document).on('keyup', '.custom-combobox-input', function(){ 
+  dropDownChange($(this).val(), $(this));
 });
 
+/*
+ ドロップダウンが選択された場合の処理。
+ 行情報の書き換えのためのステップ。
+ 本当はオートコンプリートセレクトとキーアップのイベント処理中でやればいいはずだけど
+ 両イベントをまとめる方法を調べるのが面倒くさいので分ける。いつかリファクタリングする。。。気はあまりない。
+*/
+function dropDownChange(selectItem, jQueryObj){
+  var localRouteMaster;
+  if(routeMaster[selectItem] == null){
+    localRouteMaster = getBlankRouteMaster(selectItem);
+  } else {
+    localRouteMaster = routeMaster;
+  }
+
+  // テーブルの値の書き換え
+  var rowNumClass = jQueryObj.parent().parent().parent().parent()[0].className.split(" ")[1];
+  var row = $('.' + rowNumClass);
+  rowRewrite(row, selectItem, localRouteMaster);
+}
+
+/*
+ 経路マスタに存在しない値がコンボボックスに入力された場合に使用する空の経路マスタの連想配列を返す。
+ selectItemはなんでもいいんだけど。。。
+*/
+function getBlankRouteMaster(selectItem){
+    var blankRouteMaster = {};
+    blankRouteMaster[selectItem] = {};
+    blankRouteMaster[selectItem]['business'] = '';
+    blankRouteMaster[selectItem]['round-trip'] = '';
+    blankRouteMaster[selectItem]['route1'] = '';
+    blankRouteMaster[selectItem]['route2'] = '';
+    blankRouteMaster[selectItem]['route3'] = '';
+    blankRouteMaster[selectItem]['route4'] = '';
+    blankRouteMaster[selectItem]['departure'] = '';
+    blankRouteMaster[selectItem]['arrival1'] = '';
+    blankRouteMaster[selectItem]['fare1'] = '';
+    blankRouteMaster[selectItem]['arrival2'] = '';
+    blankRouteMaster[selectItem]['fare2'] = '';
+    blankRouteMaster[selectItem]['arrival3'] = '';
+    blankRouteMaster[selectItem]['fare3'] = '';
+    blankRouteMaster[selectItem]['arrival4'] = '';
+    blankRouteMaster[selectItem]['fare4'] = '';
+
+    return blankRouteMaster;
+}
 /*
  テーブルの行データ書き換え
 */
@@ -166,21 +213,24 @@ $(function(){
       　　refreshRouteMaster();
         rewriteRouteMasterDropDown();
 
-        // 書き換え
+        // 修正後のマスタ情報で行を書き換え
         google.script.run.withSuccessHandler(result).getRouteMaster();
         function result(latestRouteMaster){
-          var allRows = $('tr');
+try{
+var allRows = $('tr');
           var totalRowNum = (allRows.length - 1) / 2;
           for(var rowNum = 0; rowNum < totalRowNum; rowNum++){
             var row = $('.row' + rowNum);
-            var routename = row.find('.routename').text();
-            
-            // プルダウンで選択した経路がマスタにない場合はスキップ
-            if(routename === '-' || latestRouteMaster[routename] == null){
-              continue;
+            var routename = row.find('.custom-combobox-input').val();
+
+            var updRouteMaster = latestRouteMaster;
+            // プルダウンで選択した経路がマスタにない場合はブランクで更新
+            if(latestRouteMaster[routename] == null){
+              updRouteMaster = getBlankRouteMaster(routename);
             }
-            rowRewrite(row, routename, latestRouteMaster);
+            rowRewrite(row, routename, updRouteMaster);
           }
+}catch(e){alert(e)}
           google.script.host.setHeight(1500);
           $('#table-panel').show();
         }
@@ -192,6 +242,11 @@ $(function(){
  作成処理実行
 */
 function createKotsuhiSeisan(){
+
+  // TBODYの非表示化。あとでコンボボックスのオートコンプリート化処理を見えなくするための仕込み。
+  $('#eventDetail').css('display', 'none');
+  $('#eventDetail').html('');
+
 　　// 表の作成
   var yymm = $('#yymm').val();
   google.script.run.withSuccessHandler(result).createEventsHtml(yymm);
@@ -199,24 +254,7 @@ function createKotsuhiSeisan(){
     $('#eventDetail').html(html);
   }
   refreshRouteMaster();
-  　　toastr.options = {
-　　  "closeButton": true,
-    "debug": false,
-    "newestOnTop": true,
-    "progressBar": false,
-    "positionClass": "toast-bottom-left",
-    "preventDuplicates": false,
-    "onclick": null,
-    "showDuration": "300",
-    "hideDuration": "1000",
-    "timeOut": "5000",
-    "extendedTimeOut": "1000",
-    "showEasing": "swing",
-    "hideEasing": "linear",
-    "showMethod": "fadeIn",
-    "hideMethod": "fadeOut"
-  }
-　　toastr['success']('データ取得完了！');
+　　showTableBody();
 }  
 /*
  最新のルートマスタを取得してグローバル変数に設定する
@@ -232,15 +270,29 @@ function refreshRouteMaster(){
  経路マスタのドロップダウンを最新情報で書き換え
 */
 function rewriteRouteMasterDropDown(){
+  // 事前にselectタグ（optionタグ）を最新化
+  // 次のOption修正の処理で現在のOptionタグの値から表示する値を取得するため
   google.script.run.withSuccessHandler(result).getRouteMasterDropdownValueTag();
-  function result(latestRouteMasterDropdownValueTag){
-    var localRouteMasterDropdownValueTag = latestRouteMasterDropdownValueTag;
-
-    // 書き換え
-    $('.dropdown-menu').each(function(index, element) {
-      $(element).html(localRouteMasterDropdownValueTag);
-    });
-　　}
+  function result(tag){
+    $('.combobox').html(tag);
+  }
+  
+  // Optionの値を修正
+  var dropdownInput = $('.custom-combobox-input');
+　　dropdownInput.autocomplete({
+    source: function( request, response ) {
+      var matcher = new RegExp( $.ui.autocomplete.escapeRegex(request.term), "i" );
+      response( $('.combobox').eq(0).children('option').map(function() {
+        var text = this.value;
+        if ( text && ( !request.term || matcher.test(text) ) )
+          return {
+              label: text,
+              value: text,
+              option: this
+            };
+      }));
+    }
+  });
 }
 
 /*
@@ -257,8 +309,6 @@ $(function () {
 　　createKotsuhiSeisan()
 });
 
-$(document).on('click', 'body', function(){
-});
 </script>
 
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
@@ -356,38 +406,51 @@ $(document).on('click', 'body', function(){
         this.element.show();
       }
     });
- 
-    $( "#combobox" ).combobox();
   } );
   </script>
 
-<div class="ui-widget">
-  <select id="combobox">
-    <option value="">Select one...</option>
-    <option value="ActionScript">ActionScript</option>
-    <option value="AppleScript">AppleScript</option>
-    <option value="Asp">Asp</option>
-    <option value="BASIC">BASIC</option>
-    <option value="C">C</option>
-    <option value="C++">C++</option>
-    <option value="Clojure">Clojure</option>
-    <option value="COBOL">COBOL</option>
-    <option value="ColdFusion">ColdFusion</option>
-    <option value="Erlang">Erlang</option>
-    <option value="Fortran">Fortran</option>
-    <option value="Groovy">Groovy</option>
-    <option value="Haskell">Haskell</option>
-    <option value="Java">Java</option>
-    <option value="JavaScript">JavaScript</option>
-    <option value="Lisp">Lisp</option>
-    <option value="Perl">Perl</option>
-    <option value="PHP">PHP</option>
-    <option value="Python">Python</option>
-    <option value="Ruby">Ruby</option>
-    <option value="Scala">Scala</option>
-    <option value="Scheme">Scheme</option>
-  </select>
-</div>
+<script>
+/*
+ テーブル（イベント行）を表示する。
+ あえてこんなことするのはコンボボックスのオートコンプリート化が
+ レンダリング済みのDOMを対象としているため。
+ TableBody(TBODY)を非表示にしたり表示したりするのは
+ オートコンプリート化される前のコンボボックスを表示しないようにするため。
+*/
+function showTableBody(){
+  // 行データが更新されたら処理開始
+  if($('tr').length > 1){
+    // コンボボックス化
+    $('.combobox').combobox();
+
+    // ドロップダウンのテキストボックスの更新
+    google.script.run.withSuccessHandler(result).getRouteMaster();
+    function result(latestRouteMaster){
+      $('.upperRow').each(function(index, element) {
+  　　    var calendarRoutename = $(element).find('td').eq(1).html();      
+    　　  var comboboxInput = $(element).find('.custom-combobox-input');
+
+        // 経路マスタの値で初期化。経路マスタになければブランクに更新。
+        if(latestRouteMaster[calendarRoutename] != null){
+　　        comboboxInput.val(latestRouteMaster[calendarRoutename]['routename']);
+        } else {
+          comboboxInput.val('');
+        }
+      });
+      $('#eventDetail').css('display', 'table-row-group');
+    }
+  } else {
+    setTimeout((function(){showTableBody()}), 1);  
+  }
+}
+
+
+
+function test2(){
+alert($('.custom-combobox-input').length);
+  alert('テスト終了');
+}
+</script>
 
 </body>
 </html>
