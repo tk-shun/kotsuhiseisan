@@ -39,12 +39,6 @@
 
 
 <style type="text/css">
-span.routename{
-    display: block;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    overflow: hidden;
-}
 .white{
   background: #FFFFFF;
 }
@@ -68,7 +62,7 @@ tbody{
 		<input type="radio" autocomplete="off" checked>外出情報編集
 	  </label>
       <label id="rootMasterEdit" class="btn btn-default">
-        <input type="radio" autocomplete="off">経路マスタ編集
+        <input type="radio" autocomplete="off">外出マスタ編集
       </label>
     </div>
 </div>
@@ -97,11 +91,13 @@ tbody{
     <colgroup span="1" style="width: 50px;">
     <colgroup span="1" style="width: 50px;">
     <colgroup span="1" style="width: 50px;">
+    <colgroup span="1" style="width: 50px;">
     <thead>
       <tr style="background: #3B75AE;color: #ffffff;">
         <th>日付</th>
-        <th>行先</th>
-        <th>経路</th>
+        <th>外出名</th>
+        <th>マスタ</th>
+        <th>訪問先</th>
         <th>用件</th>
         <th>往復</th>
         <th colspan="3">経路1</th>
@@ -115,7 +111,7 @@ tbody{
   </table>
 </div>
 <script type="text/javascript">
-var routeMaster;
+var goingOutMaster;
 
 /*
  ドロップダウンの値を選択
@@ -140,67 +136,69 @@ $(document).on('keyup', '.custom-combobox-input', function(){
 */
 function dropDownChange(selectItem, jQueryObj){
 　　// 経路マスタの取得。マスタにない場合はダミーのブランク情報を設定。
-  var localRouteMaster;
-  if(routeMaster[selectItem] == null){
-    localRouteMaster = getBlankRouteMaster(selectItem);
+  var localGoingOutMaster;
+  if(goingOutMaster[selectItem] == null){
+    localGoingOutMaster = getBlankGoingOutMaster(selectItem);
   } else {
-    localRouteMaster = routeMaster;
+    localGoingOutMaster = goingOutMaster;
   }
-
+  
   // テーブルの値の書き換え
   var rowNumClass = jQueryObj.parent().parent().parent().parent()[0].className.split(" ")[1];
   var row = $('.' + rowNumClass);
-  rowRewrite(row, selectItem, localRouteMaster);
+  rowRewrite(row, selectItem, localGoingOutMaster);
 }
 
 /*
- 経路マスタに存在しない値がコンボボックスに入力された場合に使用する空の経路マスタの連想配列を返す。
+ 外出マスタに存在しない値がコンボボックスに入力された場合に使用する空の経路マスタの連想配列を返す。
  selectItemはなんでもいいんだけど。。。
 */
-function getBlankRouteMaster(selectItem){
-    var blankRouteMaster = {};
-    blankRouteMaster[selectItem] = {};
-    blankRouteMaster[selectItem]['business'] = '';
-    blankRouteMaster[selectItem]['round-trip'] = '';
-    blankRouteMaster[selectItem]['route1'] = '';
-    blankRouteMaster[selectItem]['route2'] = '';
-    blankRouteMaster[selectItem]['route3'] = '';
-    blankRouteMaster[selectItem]['route4'] = '';
-    blankRouteMaster[selectItem]['departure'] = '';
-    blankRouteMaster[selectItem]['arrival1'] = '';
-    blankRouteMaster[selectItem]['fare1'] = '';
-    blankRouteMaster[selectItem]['arrival2'] = '';
-    blankRouteMaster[selectItem]['fare2'] = '';
-    blankRouteMaster[selectItem]['arrival3'] = '';
-    blankRouteMaster[selectItem]['fare3'] = '';
-    blankRouteMaster[selectItem]['arrival4'] = '';
-    blankRouteMaster[selectItem]['fare4'] = '';
+function getBlankGoingOutMaster(selectItem){
+    var blankGoingOutMaster = {};
+    blankGoingOutMaster[selectItem] = {};
+    blankGoingOutMaster[selectItem]['destination'] = '';
+    blankGoingOutMaster[selectItem]['business'] = '';
+    blankGoingOutMaster[selectItem]['round-trip'] = '';
+    blankGoingOutMaster[selectItem]['route1'] = '';
+    blankGoingOutMaster[selectItem]['route2'] = '';
+    blankGoingOutMaster[selectItem]['route3'] = '';
+    blankGoingOutMaster[selectItem]['route4'] = '';
+    blankGoingOutMaster[selectItem]['departure'] = '';
+    blankGoingOutMaster[selectItem]['arrival1'] = '';
+    blankGoingOutMaster[selectItem]['fare1'] = '';
+    blankGoingOutMaster[selectItem]['arrival2'] = '';
+    blankGoingOutMaster[selectItem]['fare2'] = '';
+    blankGoingOutMaster[selectItem]['arrival3'] = '';
+    blankGoingOutMaster[selectItem]['fare3'] = '';
+    blankGoingOutMaster[selectItem]['arrival4'] = '';
+    blankGoingOutMaster[selectItem]['fare4'] = '';
 
-    return blankRouteMaster;
+    return blankGoingOutMaster;
 }
 /*
  テーブルの行データ書き換え
 */
-function rowRewrite(row, routename, localRouteMaster){
-  row.eq(0).find('td').eq(3).html(localRouteMaster[routename]['business']);
-  row.eq(0).find('td').eq(4).html(localRouteMaster[routename]['round-trip']);
-  row.eq(0).find('td').eq(5).html(localRouteMaster[routename]['route1']);
-  row.eq(0).find('td').eq(6).html(localRouteMaster[routename]['route2']);
-  row.eq(0).find('td').eq(7).html(localRouteMaster[routename]['route3']);
-  row.eq(0).find('td').eq(8).html(localRouteMaster[routename]['route4']);
-  row.eq(1).find('td').eq(0).html(localRouteMaster[routename]['departure']);
-  row.eq(1).find('td').eq(1).html(localRouteMaster[routename]['arrival1']);
-  var fare1Yen = localRouteMaster[routename]['fare1'] == '' ? '' : '￥'; 
-  row.eq(1).find('td').eq(2).html(fare1Yen + localRouteMaster[routename]['fare1']);
-  row.eq(1).find('td').eq(3).html(localRouteMaster[routename]['arrival2']);
-  var fare2Yen = localRouteMaster[routename]['fare2'] == '' ? '' : '￥'; 
-  row.eq(1).find('td').eq(4).html(fare2Yen + localRouteMaster[routename]['fare2']);
-  row.eq(1).find('td').eq(5).html(localRouteMaster[routename]['arrival3']);
-  var fare3Yen = localRouteMaster[routename]['fare3'] == '' ? '' : '￥'; 
-  row.eq(1).find('td').eq(6).html(fare3Yen + localRouteMaster[routename]['fare3']);
-  row.eq(1).find('td').eq(7).html(localRouteMaster[routename]['arrival4']);
-  var fare4Yen = localRouteMaster[routename]['fare4'] == '' ? '' : '￥'; 
-  row.eq(1).find('td').eq(8).html(fare4Yen + localRouteMaster[routename]['fare4']);
+function rowRewrite(row, goingOutName, localGoingOutMaster){
+  row.eq(0).find('td').eq(3).html(localGoingOutMaster[goingOutName]['destination']);
+  row.eq(0).find('td').eq(4).html(localGoingOutMaster[goingOutName]['business']);
+  row.eq(0).find('td').eq(5).html(localGoingOutMaster[goingOutName]['round-trip']);
+  row.eq(0).find('td').eq(6).html(localGoingOutMaster[goingOutName]['route1']);
+  row.eq(0).find('td').eq(7).html(localGoingOutMaster[goingOutName]['route2']);
+  row.eq(0).find('td').eq(8).html(localGoingOutMaster[goingOutName]['route3']);
+  row.eq(0).find('td').eq(9).html(localGoingOutMaster[goingOutName]['route4']);
+  row.eq(1).find('td').eq(0).html(localGoingOutMaster[goingOutName]['departure']);
+  row.eq(1).find('td').eq(1).html(localGoingOutMaster[goingOutName]['arrival1']);
+  var fare1Yen = localGoingOutMaster[goingOutName]['fare1'] == '' ? '' : '￥'; 
+  row.eq(1).find('td').eq(2).html(fare1Yen + localGoingOutMaster[goingOutName]['fare1']);
+  row.eq(1).find('td').eq(3).html(localGoingOutMaster[goingOutName]['arrival2']);
+  var fare2Yen = localGoingOutMaster[goingOutName]['fare2'] == '' ? '' : '￥'; 
+  row.eq(1).find('td').eq(4).html(fare2Yen + localGoingOutMaster[goingOutName]['fare2']);
+  row.eq(1).find('td').eq(5).html(localGoingOutMaster[goingOutName]['arrival3']);
+  var fare3Yen = localGoingOutMaster[goingOutName]['fare3'] == '' ? '' : '￥'; 
+  row.eq(1).find('td').eq(6).html(fare3Yen + localGoingOutMaster[goingOutName]['fare3']);
+  row.eq(1).find('td').eq(7).html(localGoingOutMaster[goingOutName]['arrival4']);
+  var fare4Yen = localGoingOutMaster[goingOutName]['fare4'] == '' ? '' : '￥'; 
+  row.eq(1).find('td').eq(8).html(fare4Yen + localGoingOutMaster[goingOutName]['fare4']);
 }
 
 /*
@@ -214,25 +212,25 @@ $(function(){
       });
 
       $('#gaishutsuInfoEdit').on('click', function(){
-      　　refreshRouteMaster();
-        rewriteRouteMasterDropDown();
+      　　refreshGoingOutMaster();
+        rewriteGoingOutMasterDropDown();
 
         // 修正後のマスタ情報で行を書き換え
-        google.script.run.withSuccessHandler(result).getRouteMaster();
-        function result(latestRouteMaster){
+        google.script.run.withSuccessHandler(result).getGoingOutMaster();
+        function result(latestGoingOutMaster){
         
         var allRows = $('tr');
           var totalRowNum = (allRows.length - 1) / 2;
           for(var rowNum = 0; rowNum < totalRowNum; rowNum++){
             var row = $('.row' + rowNum);
-            var routename = row.find('.custom-combobox-input').val();
+            var goingOutName = row.find('.custom-combobox-input').val();
 
-            var updRouteMaster = latestRouteMaster;
+            var updGoingOutMaster = latestGoingOutMaster;
             // プルダウンで選択した経路がマスタにない場合はブランクで更新
-            if(latestRouteMaster[routename] == null){
-              updRouteMaster = getBlankRouteMaster(routename);
+            if(latestGoingOutMaster[goingOutName] == null){
+              updGoingOutMaster = getBlankGoingOutMaster(goingOutName);
             }
-            rowRewrite(row, routename, updRouteMaster);
+            rowRewrite(row, goingOutName, updGoingOutMaster);
           }
 
           google.script.host.setHeight(1500);
@@ -246,7 +244,6 @@ $(function(){
  作成処理実行
 */
 function createKotsuhiSeisan(){
-
   // TBODYの非表示化。あとでコンボボックスのオートコンプリート化処理を見えなくするための仕込み。
   $('#eventDetail').css('display', 'none');
   $('#eventDetail').html('');
@@ -257,26 +254,26 @@ function createKotsuhiSeisan(){
   function result(html){
     $('#eventDetail').html(html);
   }
-  refreshRouteMaster();
+  refreshGoingOutMaster();
 　　showTableBody();
 }  
 /*
  最新のルートマスタを取得してグローバル変数に設定する
 */
-function refreshRouteMaster(){
-  google.script.run.withSuccessHandler(result).getRouteMaster();
-  function result(latestRouteMaster){
-    routeMaster = latestRouteMaster;
+function refreshGoingOutMaster(){
+  google.script.run.withSuccessHandler(result).getGoingOutMaster();
+  function result(latestGoingOutMaster){
+    goingOutMaster = latestGoingOutMaster;
   }
 }
 
 /*
  経路マスタのドロップダウンを最新情報で書き換え
 */
-function rewriteRouteMasterDropDown(){
+function rewriteGoingOutMasterDropDown(){
   // 事前にselectタグ（optionタグ）を最新化
   // 次のOption修正の処理で現在のOptionタグの値から表示する値を取得するため
-  google.script.run.withSuccessHandler(result).getRouteMasterDropdownValueTag();
+  google.script.run.withSuccessHandler(result).getGoingOutMasterDropdownValueTag();
   function result(tag){
     $('.combobox').html(tag);
   }
@@ -428,15 +425,15 @@ function showTableBody(){
     $('.combobox').combobox();
 
     // ドロップダウンのテキストボックスの更新
-    google.script.run.withSuccessHandler(result).getRouteMaster();
-    function result(latestRouteMaster){
+    google.script.run.withSuccessHandler(result).getGoingOutMaster();
+    function result(latestGoingOutMaster){
       $('.upperRow').each(function(index, element) {
-  　　    var calendarRoutename = $(element).find('td').eq(1).html();      
+  　　    var calendarGoingOutName = $(element).find('td').eq(1).html();      
     　　  var comboboxInput = $(element).find('.custom-combobox-input');
 
         // 経路マスタの値で初期化。経路マスタになければブランクに更新。
-        if(latestRouteMaster[calendarRoutename] != null){
-　　        comboboxInput.val(latestRouteMaster[calendarRoutename]['routename']);
+        if(latestGoingOutMaster[calendarGoingOutName] != null){
+　　        comboboxInput.val(latestGoingOutMaster[calendarGoingOutName]['goingOutName']);
         } else {
           comboboxInput.val('');
         }

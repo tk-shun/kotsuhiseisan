@@ -8,14 +8,15 @@ function CalendarEventRowMaker() {
     var rowTemplate = '';
     rowTemplate += '<tr class="${trAttribute} row${rownum} upperRow">';
     rowTemplate += '  <td rowspan="2">${date}(${dayOfTheWeek})</td>';
-    rowTemplate += '  <td rowspan="2">${destination}</td>';
+    rowTemplate += '  <td rowspan="2">${goingOutName}</td>';
     rowTemplate += '<td rowspan="2">';
     rowTemplate += '<div class="ui-widget">';
     rowTemplate += '  <select class="combobox">';
-    rowTemplate += '   ${routeMasterDropdownValueTag}';
+    rowTemplate += '   ${goingOutMasterDropdownValueTag}';
     rowTemplate += '  </select>';
     rowTemplate += '</div>';
     rowTemplate += '</td>';
+    rowTemplate += '  <td rowspan="2">${destination}</td>';
     rowTemplate += '  <td rowspan="2">${business}</td>';
     rowTemplate += '  <td rowspan="2">${round-trip}</td>';
     rowTemplate += '  <td colspan="3">${route1}</td>';
@@ -42,13 +43,13 @@ function CalendarEventRowMaker() {
   カレンダーから取得したイベントをHTMLに変換する。（メインダイアログのTBODY内部）
   */
   this.convertEventsToHtml = function(events){
-    var routeMaster = new RouteMaster();
-    routeMaster.load();
-    var routeMasterDropdownValueTag = routeMaster.createRouteMasterDropdownValueTag();
+    var goingOutMaster = new GoingOutMaster();
+    goingOutMaster.load();
+    var goingOutMasterDropdownValueTag = goingOutMaster.createGoingOutMasterDropdownValueTag();
     
     var html = '';
     for(var i = 0; i < events.length; i++){
-      html += this.createRow(events[i], i, routeMaster.masterData, routeMasterDropdownValueTag);
+      html += this.createRow(events[i], i, goingOutMaster.masterData, goingOutMasterDropdownValueTag);
     }
     return html;
   }
@@ -57,18 +58,18 @@ function CalendarEventRowMaker() {
   行データを作成する。
   行データは行テンプレートの変数部分を書き換えて作成する。
   */  
-  this.createRow = function(event, index, routeMasterData, routeMasterDropdownValueTag){
+  this.createRow = function(event, index, goingOutMasterData, goingOutMasterDropdownValueTag){
     var rowHtml = this.rowTemplate();
     rowHtml = rowHtml.replace('${date}', event['date']);
-    rowHtml = rowHtml.replace('${destination}', event['destination']);
+    rowHtml = rowHtml.replace('${goingOutName}', event['goingOutName']);
     rowHtml = rowHtml.replace('${dayOfTheWeek}', event['dayOfTheWeek']);
     
     // 経路マスタの有無に関係なく設定
     rowHtml = rowHtml.replace(/\$\{rownum\}/g, index);
-    rowHtml = rowHtml.replace('${routeMasterDropdownValueTag}', routeMasterDropdownValueTag);
+    rowHtml = rowHtml.replace('${goingOutMasterDropdownValueTag}', goingOutMasterDropdownValueTag);
     
-    if(routeMasterData[event['destination']] == null){
-      rowHtml = rowHtml.replace(/\$\{routename}/g, '-');
+    if(goingOutMasterData[event['goingOutName']] == null){
+      rowHtml = rowHtml.replace(/\$\{destination}/g, '');
       rowHtml = rowHtml.replace('${business}', '');
       rowHtml = rowHtml.replace('${round-trip}', '');
       rowHtml = rowHtml.replace('${route1}', '');
@@ -85,27 +86,27 @@ function CalendarEventRowMaker() {
       rowHtml = rowHtml.replace('${fare3}', '');
       rowHtml = rowHtml.replace('${fare4}', '');      
     } else {     
-      var routeMasterDataDetail = routeMasterData[event['destination']];
-      rowHtml = rowHtml.replace(/\$\{routename}/g, routeMasterDataDetail['routename']);
-      rowHtml = rowHtml.replace('${business}', routeMasterDataDetail['business']);
-      rowHtml = rowHtml.replace('${round-trip}', routeMasterDataDetail['round-trip']);
-      rowHtml = rowHtml.replace('${route1}', routeMasterDataDetail['route1']);
-      rowHtml = rowHtml.replace('${route2}', routeMasterDataDetail['route2']);
-      rowHtml = rowHtml.replace('${route3}', routeMasterDataDetail['route3']);
-      rowHtml = rowHtml.replace('${route4}', routeMasterDataDetail['route4']);
-      rowHtml = rowHtml.replace('${departure}', routeMasterDataDetail['departure']);
-      rowHtml = rowHtml.replace('${arrival1}', routeMasterDataDetail['arrival1']);
-      rowHtml = rowHtml.replace('${arrival2}', routeMasterDataDetail['arrival2']);
-      rowHtml = rowHtml.replace('${arrival3}', routeMasterDataDetail['arrival3']);
-      rowHtml = rowHtml.replace('${arrival4}', routeMasterDataDetail['arrival4']);
-      var fare1Yen = routeMasterDataDetail['fare1'] == '' ? '' : '￥'; 
-      rowHtml = rowHtml.replace('${fare1}', fare1Yen + routeMasterDataDetail['fare1']);
-      var fare2Yen = routeMasterDataDetail['fare2'] == '' ? '' : '￥'; 
-      rowHtml = rowHtml.replace('${fare2}', fare2Yen + routeMasterDataDetail['fare2']);
-      var fare3Yen = routeMasterDataDetail['fare3'] == '' ? '' : '￥'; 
-      rowHtml = rowHtml.replace('${fare3}', fare3Yen + routeMasterDataDetail['fare3']);
-      var fare4Yen = routeMasterDataDetail['fare4'] == '' ? '' : '￥'; 
-      rowHtml = rowHtml.replace('${fare4}', fare4Yen + routeMasterDataDetail['fare4']);
+      var goingOutMasterDataDetail = goingOutMasterData[event['goingOutName']];
+      rowHtml = rowHtml.replace(/\$\{destination}/g, goingOutMasterDataDetail['destination']);
+      rowHtml = rowHtml.replace('${business}', goingOutMasterDataDetail['business']);
+      rowHtml = rowHtml.replace('${round-trip}', goingOutMasterDataDetail['round-trip']);
+      rowHtml = rowHtml.replace('${route1}', goingOutMasterDataDetail['route1']);
+      rowHtml = rowHtml.replace('${route2}', goingOutMasterDataDetail['route2']);
+      rowHtml = rowHtml.replace('${route3}', goingOutMasterDataDetail['route3']);
+      rowHtml = rowHtml.replace('${route4}', goingOutMasterDataDetail['route4']);
+      rowHtml = rowHtml.replace('${departure}', goingOutMasterDataDetail['departure']);
+      rowHtml = rowHtml.replace('${arrival1}', goingOutMasterDataDetail['arrival1']);
+      rowHtml = rowHtml.replace('${arrival2}', goingOutMasterDataDetail['arrival2']);
+      rowHtml = rowHtml.replace('${arrival3}', goingOutMasterDataDetail['arrival3']);
+      rowHtml = rowHtml.replace('${arrival4}', goingOutMasterDataDetail['arrival4']);
+      var fare1Yen = goingOutMasterDataDetail['fare1'] == '' ? '' : '￥'; 
+      rowHtml = rowHtml.replace('${fare1}', fare1Yen + goingOutMasterDataDetail['fare1']);
+      var fare2Yen = goingOutMasterDataDetail['fare2'] == '' ? '' : '￥'; 
+      rowHtml = rowHtml.replace('${fare2}', fare2Yen + goingOutMasterDataDetail['fare2']);
+      var fare3Yen = goingOutMasterDataDetail['fare3'] == '' ? '' : '￥'; 
+      rowHtml = rowHtml.replace('${fare3}', fare3Yen + goingOutMasterDataDetail['fare3']);
+      var fare4Yen = goingOutMasterDataDetail['fare4'] == '' ? '' : '￥'; 
+      rowHtml = rowHtml.replace('${fare4}', fare4Yen + goingOutMasterDataDetail['fare4']);
     }
     // 行のストライプ・・・をしようとした残骸
     if(index % 2 === 0){
