@@ -1,8 +1,13 @@
 function CalendarEventRowMaker() {
+  
+  /*
+  行のテンプレートとなるHTMLを返す。
+  可変の部分は変数としておき、別の処理の中で置換して使用する。
+  */
   this.rowTemplate = function(){
     var rowTemplate = '';
     rowTemplate += '<tr class="${trAttribute} row${rownum} upperRow">';
-    rowTemplate += '  <td rowspan="2">${date}</td>';
+    rowTemplate += '  <td rowspan="2">${date}(${dayOfTheWeek})</td>';
     rowTemplate += '  <td rowspan="2">${destination}</td>';
     rowTemplate += '<td rowspan="2">';
     rowTemplate += '<div class="ui-widget">';
@@ -33,11 +38,14 @@ function CalendarEventRowMaker() {
     return rowTemplate;
   }
   
+  /*
+  カレンダーから取得したイベントをHTMLに変換する。（メインダイアログのTBODY内部）
+  */
   this.convertEventsToHtml = function(events){
     var routeMaster = new RouteMaster();
     routeMaster.load();
     var routeMasterDropdownValueTag = routeMaster.createRouteMasterDropdownValueTag();
-
+    
     var html = '';
     for(var i = 0; i < events.length; i++){
       html += this.createRow(events[i], i, routeMaster.masterData, routeMasterDropdownValueTag);
@@ -45,18 +53,18 @@ function CalendarEventRowMaker() {
     return html;
   }
   
-  
   /*
-    行データを作成する。
-    行データは行テンプレートの変数部分を書き換えて作成する。
+  行データを作成する。
+  行データは行テンプレートの変数部分を書き換えて作成する。
   */  
   this.createRow = function(event, index, routeMasterData, routeMasterDropdownValueTag){
     var rowHtml = this.rowTemplate();
     rowHtml = rowHtml.replace('${date}', event['date']);
     rowHtml = rowHtml.replace('${destination}', event['destination']);
+    rowHtml = rowHtml.replace('${dayOfTheWeek}', event['dayOfTheWeek']);
     
     // 経路マスタの有無に関係なく設定
-    rowHtml = rowHtml.replace(/\$\{rownum\}/g, index); // 正規表現を使用して、複数個所の一括置換
+    rowHtml = rowHtml.replace(/\$\{rownum\}/g, index);
     rowHtml = rowHtml.replace('${routeMasterDropdownValueTag}', routeMasterDropdownValueTag);
     
     if(routeMasterData[event['destination']] == null){
@@ -101,7 +109,7 @@ function CalendarEventRowMaker() {
     }
     // 行のストライプ・・・をしようとした残骸
     if(index % 2 === 0){
-//      rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
+      //      rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
     } else {
       rowHtml = rowHtml.replace(/\$\{trAttribute\}/g, 'active');
     }

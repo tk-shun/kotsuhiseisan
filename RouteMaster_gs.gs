@@ -1,10 +1,10 @@
 function RouteMaster() {
-
+  
   this.masterData;
- 
+  
   /*
-   スプレッドシートから経路マスタを取得し、プロパティに設定する。
-   また、取得した結果は連想配列形式に変換した上で設定する。
+  スプレッドシートから経路マスタを取得し、プロパティに設定する。
+  また、取得した結果は連想配列形式に変換した上で設定する。
   */
   this.load = function(){
     var sheet = SpreadsheetApp.getActive().getSheetByName('経路');  
@@ -17,7 +17,7 @@ function RouteMaster() {
   }
   
   /*
-    スプレッドシート上の経路マスタを連想配列形式に変換する。
+  スプレッドシート上の経路マスタを連想配列形式に変換する。
   */
   this.formatRouteMaster = function(unformattedRouteMaster){
     var formattedRouteMaster = {};
@@ -46,11 +46,11 @@ function RouteMaster() {
     
     return formattedRouteMaster;  
   }
-
- /*
+  
+  /*
   経路マスタの情報をドロップダウンで選択する際のタグを作成する。
   ※GASとHTML間でマスタ情報を受け渡す際、連想配列で渡すと謎ソートされるっぽいので先にテキストで作っておく。
- */
+  */
   this.createRouteMasterDropdownValueTag = function (){
     var routeMasterDropdownValueTag = '';
     Object.keys(this.masterData).forEach(
@@ -65,9 +65,9 @@ function RouteMaster() {
     return routeMasterDropdownValueTag;
   }
   
- /*
+  /*
   経路マスタのキーを返す
- */
+  */
   this.getRouteMasterKyes = function (){
     return Object.keys(this.masterData);
   }
